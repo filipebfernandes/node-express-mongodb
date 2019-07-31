@@ -1,9 +1,9 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import uuid from "uuid/v4";
 
 import models from "./models";
+import routes from "./routes";
 
 const app = express();
 
@@ -20,46 +20,9 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("/users", (req, res) =>
-  res.send(Object.values(req.context.models.users))
-);
-
-app.get("/users/:userId", (req, res) =>
-  res.send(req.context.models.users[req.params.userId])
-);
-
-app.get("/messages", (req, res) =>
-  res.send(Object.values(req.context.models.messages))
-);
-
-app.post("/messages", (req, res) => {
-  const id = uuid();
-
-  const message = {
-    id,
-    text: req.body.text,
-    userId: req.context.me
-  };
-
-  req.context.models.messages[id] = message;
-
-  return res.send(message);
-});
-
-app.delete("/messages/:messageId", (req, res) => {
-  const {
-    [req.params.messageId]: message,
-    ...otherMessages
-  } = req.context.models.messages;
-
-  req.context.models.messages = otherMessages;
-
-  return res.send(message);
-});
-
-app.get("/session", (req, res) =>
-  res.send(req.context.models.users[req.context.me.id])
-);
+app.use("/session", routes.session);
+app.use("/users", routes.user);
+app.use("/messages", routes.message);
 
 app.get("/", (req, res) => res.send("Hello World!"));
 
