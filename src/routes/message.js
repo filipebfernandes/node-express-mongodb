@@ -1,35 +1,40 @@
 import { Router } from "express";
-import uuid from "uuid/v4";
 
 const router = Router();
 
-router.get("/", (req, res) =>
-  res.send(Object.values(req.context.models.messages))
-);
+router.get("/", async (req, res) => {
+  const messages = await req.context.models.Message.find();
+  res.send(messages);
+});
 
-router.post("/", (req, res) => {
-  const id = uuid();
+router.get("/:messageId", async (req, res) => {
+  const message = await req.context.models.Message.findById(
+    req.params.messageId
+  );
 
-  const message = {
-    id,
+  res.send(message);
+});
+
+router.post("/", async (req, res) => {
+  const message = await req.context.models.Message.create({
     text: req.body.text,
-    userId: req.context.me
-  };
-
-  req.context.models.messages[id] = message;
+    user: req.context.me.id
+  });
 
   return res.send(message);
 });
 
-router.delete("/:messageId", (req, res) => {
-  const {
-    [req.params.messageId]: message,
-    ...otherMessages
-  } = req.context.models.messages;
+router.delete("/:messageId", async (req, res) => {
+  const message = await req.context.models.Message.findById(
+    req.params.messageId
+  );
 
-  req.context.models.messages = otherMessages;
+  let result = null;
+  if (message) {
+    result = await message.remove();
+  }
 
-  return res.send(message);
+  res.send(result);
 });
 
 export default router;
