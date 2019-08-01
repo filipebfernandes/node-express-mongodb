@@ -1,3 +1,3 @@
-# node-express-postgres
+# node-express-mongodb
 
-## Training repository for nodejs application with express and postgres
+## Training repository for nodejs application with express and mongodb
